@@ -1,44 +1,81 @@
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import declared_attr, relationship
+from flask_security import RoleMixin, UserMixin
+from sqlalchemy.orm import declared_attr
 
 from app.app import db
-from flask_security.models import fsqla_v2
 
 
-class Role(db.Model, fsqla_v2.FsRoleMixin):
+class RolesUsers(db.Model):
+    __tablename__ = 'roles_users'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column('user_id', db.Integer(), db.ForeignKey('user.id'))
+    role_id = db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+
+
+class Role(db.Model, RoleMixin):
     __tablename__ = 'role'
-    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+    permissions = db.Column(db.Text())
+    update_datetime = db.Column(db.DateTime())
 
-    def __repr__(self):
-        return self.name
 
-
-class User(db.Model, fsqla_v2.FsUserMixin):
+class User(db.Model, UserMixin):
     __tablename__ = 'user'
-    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer(), primary_key=True)
+    email = db.Column(db.String(255), unique=True)
+    password = db.Column(db.String(255))
+    active = db.Column(db.Boolean())
+    fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
+    confirmed_at = db.Column(db.DateTime())
+    last_login_at = db.Column(db.DateTime())
+    current_login_at = db.Column(db.DateTime())
+    last_login_ip = db.Column(db.String(64))
+    current_login_ip = db.Column(db.String(64))
+    login_count = db.Column(db.Integer())
+    tf_primary_method = db.Column(db.String(64))
+    tf_totp_secret = db.Column(db.String(255))
+    tf_phone_number = db.Column(db.String(128))
+    create_datetime = db.Column(db.DateTime())
+    update_datetime = db.Column(db.DateTime())
+    username = db.Column(db.String(255))
+    us_totp_secrets = db.Column(db.Text())
+    us_phone_number = db.Column(db.String(128))
+    email_change_new = db.Column(db.String(255))
+    email_change_code = db.Column(db.String(20))
+    email_change_last = db.Column(db.DateTime())
+    fs_webauthn_user_handle = db.Column(db.String(64), unique=True)
+
+    roles = db.relationship('Role',
+                            secondary='roles_users',
+                            backref=db.backref('users', lazy='dynamic'))
 
     @declared_attr
-    def webauthn(cls):
-        return relationship("WebAuthn", backref="users", cascade="all, delete")
+    def webauthn_relations(cls):
+        return db.relationship("WebAuthn",
+                               primaryjoin="User.id == foreign(WebAuthn.credential_id)",
+                               secondary="WebAuthn",
+                               secondaryjoin="User.id == foreign(WebAuthn.credential_id)",
+                               backref=db.backref('users', lazy='dynamic'),
+                               cascade="all, delete")
 
     def __repr__(self):
         return self.email
 
-    def __iter__(self):
-        values = vars(self)
-        for attr in self.__mapper__.columns.keys():
-            if attr in values:
-                yield attr, values[attr]
 
-
-class WebAuthn(db.Model, fsqla_v2.FsUserMixin):
+class WebAuthn(db.Model):
     __tablename__ = 'WebAuthn'
-    __table_args__ = {'extend_existing': True}
 
-    @declared_attr
-    def user_id(cls):
-        return Column(
-            Integer,
-            ForeignKey("user.id", ondelete="CASCADE"),
-            nullable=False,
-        )
+    id = db.Column(db.Integer(), primary_key=True)
+    credential_id = db.Column(db.Integer(), db.ForeignKey('user.id'), nullable=False)
+    public_key = db.Column(db.LargeBinary(255))
+    sign_count = db.Column(db.Integer())
+    transports = db.Column(db.Text())
+    extensions = db.Column(db.String(255))
+    lastuse_datetime = db.Column(db.DateTime())
+    name = db.Column(db.String(64))
+    usage = db.Column(db.String(64))
+    backup_state = db.Column(db.Integer())
+    device_type = db.Column(db.String(64))
+
+    user_relation = db.relationship("User", backref="webauthn", foreign_keys=[credential_id])

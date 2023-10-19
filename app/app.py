@@ -2,7 +2,6 @@ from datetime import datetime
 
 from flask import Flask
 from flask_security import Security, SQLAlchemyUserDatastore
-from flask_security.models import fsqla_v2
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -26,22 +25,10 @@ def create_app():
 
     db.init_app(app)
 
-    with app.app_context():
-        db.reflect()
-
-    from sqlalchemy import Column, Integer, ForeignKey
-    fsqla_v2.FsModels.db = db
-    fsqla_v2.FsModels.user_table_name = "user"
-    fsqla_v2.FsModels.role_table_name = "role"
-    fsqla_v2.FsModels.roles_users = db.Table(
-        "roles_users",
-        Column("user_id", Integer(), ForeignKey(f"user.id")),
-        Column("role_id", Integer(), ForeignKey(f"role.id")),
-        extend_existing=True
-    )
-
-    from app.models import User, Role
+    from app.models import User, Role, WebAuthn
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+    user_datastore.webauthn_model = WebAuthn
+
     security.init_app(app, user_datastore)
 
     from app.views.example import bp as bp_example
