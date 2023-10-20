@@ -1,7 +1,24 @@
 from flask_security import RoleMixin, UserMixin
 from sqlalchemy.orm import declared_attr
+from sqlalchemy import types
 
 from app.app import db
+
+
+class StringListColumn(types.TypeDecorator):
+    impl = types.Text
+
+    def process_bind_param(self, value, dialect):
+        if value is not None and value != '':
+            # Join the list elements into a single string with a delimiter
+            return ','.join(value)
+        return ''
+
+    def process_result_value(self, value, dialect):
+        if value is not None and value != '':
+            # Split the stored string by the delimiter to retrieve the list
+            return value.split(',')
+        return ''
 
 
 class RolesUsers(db.Model):
@@ -53,9 +70,9 @@ class User(db.Model, UserMixin):
     @declared_attr
     def webauthn_relations(cls):
         return db.relationship("WebAuthn",
-                               primaryjoin="User.id == foreign(WebAuthn.credential_id)",
+                               primaryjoin="User.id == foreign(WebAuthn.user_id)",
                                secondary="WebAuthn",
-                               secondaryjoin="User.id == foreign(WebAuthn.credential_id)",
+                               secondaryjoin="User.id == foreign(WebAuthn.user_id)",
                                backref=db.backref('users', lazy='dynamic'),
                                cascade="all, delete")
 
@@ -67,15 +84,19 @@ class WebAuthn(db.Model):
     __tablename__ = 'WebAuthn'
 
     id = db.Column(db.Integer(), primary_key=True)
-    credential_id = db.Column(db.Integer(), db.ForeignKey('user.id'), nullable=False)
-    public_key = db.Column(db.LargeBinary(255))
+    credential_id = db.Column(db.LargeBinary(1024))
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id'), nullable=False)
+    public_key = db.Column(db.LargeBinary(1024))
     sign_count = db.Column(db.Integer())
-    transports = db.Column(db.Text())
+    transports = db.Column(StringListColumn)
     extensions = db.Column(db.String(255))
     lastuse_datetime = db.Column(db.DateTime())
     name = db.Column(db.String(64))
     usage = db.Column(db.String(64))
-    backup_state = db.Column(db.Integer())
+    backup_state = db.Column(db.Boolean())
     device_type = db.Column(db.String(64))
 
-    user_relation = db.relationship("User", backref="webauthn", foreign_keys=[credential_id])
+    user_relation = db.relationship("User", backref="webauthn", foreign_keys=[user_id])
+
+    def get_user_mapping(self):
+        return {'id': self.user_id}
