@@ -37,7 +37,7 @@ CREATE TABLE `user` (
   `email_change_new` varchar(255) DEFAULT NULL,
   `email_change_code` varchar(20) DEFAULT NULL,
   `email_change_last` timestamp NULL DEFAULT NULL,
-  `fs_webauthn_user_handle` varchar(64) NOT NULL
+  `fs_webauthn_user_handle` varchar(64) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 

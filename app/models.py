@@ -10,13 +10,11 @@ class StringListColumn(types.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         if value is not None and value != '':
-            # Join the list elements into a single string with a delimiter
             return ','.join(value)
         return ''
 
     def process_result_value(self, value, dialect):
         if value is not None and value != '':
-            # Split the stored string by the delimiter to retrieve the list
             return value.split(',')
         return ''
 
@@ -61,7 +59,7 @@ class User(db.Model, UserMixin):
     email_change_new = db.Column(db.String(255))
     email_change_code = db.Column(db.String(20))
     email_change_last = db.Column(db.DateTime())
-    fs_webauthn_user_handle = db.Column(db.String(64), unique=True)
+    fs_webauthn_user_handle = db.Column(db.String(64), unique=True, nullable=True)
 
     roles = db.relationship('Role',
                             secondary='roles_users',

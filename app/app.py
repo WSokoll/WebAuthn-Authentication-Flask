@@ -4,8 +4,10 @@ from flask import Flask
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_sqlalchemy import SQLAlchemy
 
+from app.forms.security import CustomWebAuthnSigninResponseForm
+
 db = SQLAlchemy()
-security = Security()
+security = Security(wan_signin_response_form=CustomWebAuthnSigninResponseForm)
 
 
 def create_app():
