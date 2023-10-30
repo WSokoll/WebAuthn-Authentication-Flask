@@ -1,0 +1,45 @@
+{% extends "base.jinja" %}
+
+{% block content %}
+  <div class="text-center mt-5">
+    <h1><b>Two-Factor Authentication Demo</b></h1>
+
+    {% if current_user.is_authenticated and webauthn_enabled %}
+      <h3 class="mt-5 mb-3">Logged in with two-factor enabled</h3>
+      <i class="bi bi-emoji-heart-eyes emoji"></i><br>
+
+      <a href="{{ url_for_security('logout') }}">
+        <button class="btn btn-secondary btn-lg border mt-5 mb-2" style="width: 300px">
+          LOG OUT
+        </button>
+      </a>
+
+
+    {% elif current_user.is_authenticated %}
+      <h3 class="mt-5 mb-3">Logged in, but two-factor disabled</h3>
+      <i class="bi bi-emoji-neutral emoji"></i><br>
+
+      <a href="{{ url_for_security('wan_register') }}">
+        <button class="btn btn-secondary btn-lg border mt-5 mb-2" style="width: 300px">
+          SET UP WEBAUTHN
+        </button>
+      </a>
+
+    {% else %}
+      <h3 class="mt-5 mb-3">Not logged in</h3>
+      <i class="bi bi-emoji-frown emoji"></i><br>
+
+      <a href="{{ url_for_security('login') }}">
+        <button class="btn btn-secondary btn-lg border mt-5 mb-2" style="width: 300px">
+          LOG IN
+        </button>
+      </a><br>
+      <a href="{{ url_for_security('register') }}">
+        <button class="btn btn-secondary btn-lg border" style="width: 300px">
+          REGISTER
+        </button>
+      </a>
+    {% endif %}
+
+  </div>
+{% endblock %}

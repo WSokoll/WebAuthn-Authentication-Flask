@@ -1,0 +1,42 @@
+ body {
+    background: linear-gradient(135deg, #8cb8c2, #6fa1a7, #acc1c5, #d3e0e0, #8cb8c2);
+    height: 100vh;
+}
+.emoji {
+    font-size: 6rem;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #8cb8c2, #6fa1a7, #acc1c5, #d3e0e0, #8cb8c2);
+    border: none;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #7aafb9, #5d939f, #90b2bd, #b7cdd9, #7aafb9);
+}
+
+.btn-primary:focus {
+    background: linear-gradient(135deg, #7aafb9, #5d939f, #90b2bd, #b7cdd9, #7aafb9);
+}
+
+.btn-primary:active {
+    background: linear-gradient(135deg, #5f8f9e, #4a7a8b, #7c9aa7, #a1b5c1, #5f8f9e);
+}
+
+.btn-secondary {
+    background: #6a9fab;
+    border: none;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background: #5d939f;
+}
+
+.btn-secondary:focus {
+    background: #5d939f;
+}
+
+.btn-secondary:active {
+    background: #5d939f;
+}

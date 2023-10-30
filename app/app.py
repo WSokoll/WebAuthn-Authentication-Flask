@@ -15,7 +15,7 @@ def create_app():
         __name__,
         instance_relative_config=False,
         static_folder='static',
-        static_url_path='/static'
+        static_url_path='/app/static'
     )
 
     app.config.from_pyfile('config.default.py')
@@ -33,7 +33,7 @@ def create_app():
 
     security.init_app(app, user_datastore)
 
-    from app.views.example import bp as bp_example
-    app.register_blueprint(bp_example)
+    from app.views.home import bp as bp_home
+    app.register_blueprint(bp_home)
 
     return app

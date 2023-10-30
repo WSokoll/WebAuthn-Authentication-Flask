@@ -1,0 +1,37 @@
+{% if security.registerable or security.recoverable or security.confirmable or security.unified_signin or security.two_factor or security.webauthn %}
+<hr class="mt-4 mb-1">
+
+{% if current_user and current_user.is_authenticated %}
+  {# already authenticated user #}
+  <a href="{{ url_for_security('logout') }}">{{ _fsdomain("Sign out") }}</a><br/>
+  {% if security.changeable  and not change_password_page%}
+    <a href="{{ url_for_security('change_password') }}">{{ _fsdomain("Change Password") }}</a>
+  {% endif %}
+  {% if security.two_factor %}
+    <a href="{{ url_for_security('two_factor_setup') }}">{{ _fsdomain("Two Factor Setup") }}
+  {% endif %}
+  {% if security.unified_signin %}
+    <a href="{{ url_for_security('us_setup') }}">{{ _fsdomain("Unified Signin Setup") }}
+  {% endif %}
+  {% if security.webauthn and not wan_register_page %}
+    <a href="{{ url_for_security('wan_register') }}">{{ _fsdomain("WebAuthn Setup") }}
+  {% endif %}
+{% else %}
+  {% if not skip_login_menu and not login_page %}
+   <a href="{{ url_for_security('login') }}{% if 'next' in request.args %}?next={{ request.args.next|urlencode }}{% endif %}">{{ _fsdomain('Login') }}</a><br/>
+  {% endif %}
+  {% if security.unified_signin and not skip_login_menu %}
+  <a href="{{ url_for_security('us_signin') }}{% if 'next' in request.args %}?next={{ request.args.next|urlencode }}{% endif %}">{{ _fsdomain("Unified Sign In") }}</a><br/>
+  {% endif %}
+  {% if security.registerable and not register_page %}
+  <a href="{{ url_for_security('register') }}{% if 'next' in request.args %}?next={{ request.args.next|urlencode }}{% endif %}">{{ _fsdomain('Register') }}</a><br/>
+  {% endif %}
+  {% if security.recoverable %}
+  <a href="{{ url_for_security('forgot_password') }}">{{ _fsdomain('Forgot password') }}</a><br/>
+  {% endif %}
+  {% if security.confirmable and not confirm_page %}
+  <a href="{{ url_for_security('send_confirmation') }}">{{ _fsdomain('Confirm account') }}</a>
+  {% endif %}
+{% endif %}
+
+{% endif %}
